@@ -1,0 +1,19 @@
+import json, requests
+
+url = 'http://acarjsystem.herokuapp.com/carlist/TEJ123'
+"""
+params = dict(
+    origin='Chicago,IL',
+    destination='Los+Angeles,CA',
+    waypoints='Joplin,MO|Oklahoma+City,OK',
+    sensor='false'
+
+)
+THIS IS FOR CAR STATUS
+"""
+data = requests.get(url=url) #params=params for parameter before getting
+binary = data.content
+output = json.loads(binary)
+
+# test to see if the request was valid
+print output['car_stat']
