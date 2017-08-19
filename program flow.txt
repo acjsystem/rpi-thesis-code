@@ -1,0 +1,18 @@
+initial get user info 
+|get car status (from db | not yet implemented |get date and time of report)
+^	| check for messages sent by sms
+|		|(get date and time)is sms latest? yes ->  get date and time & change values [A] & update DB |no->ignore
+|			|no ->ignore sms
+|			|get commands
+|			|implement commands (create specific for taser)
+|			|get photo and loc if needed
+|			|if taser -> on then off if initial command was given, ignore following orders
+|			|send photo and location
+----------------
+														
+sino lang pwede magoff ng kotse na phone number?
+if owner only:
+	-what if phone was stolen
+if other number too:
+	-everyone has access to turning car off
+	UNLESS there is pin
