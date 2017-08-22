@@ -1,4 +1,8 @@
 """
+KULANG:
+TASER
+
+
 TO DO:
 Get camera image ./
 and send data to website. check if done properly./
@@ -208,9 +212,9 @@ try:
 		global car_stat
 		global loc_stat
 		global ignition
-		if loc_stat == "True":
-			time.sleep(5)
-			print("WAITING FOR MESSAGES")
+		#if loc_stat == "True":
+		time.sleep(5)
+		print("WAITING FOR MESSAGES")
 
 		res = ser.readline()
 		if(res.startswith("+CMTI:")): #AT command for incoming text, not necessarily be printed but it looks like this "+CMTI: "SM", 1" where "SM" is the status and 1 is the message ID
@@ -262,6 +266,9 @@ try:
 		except requests.exceptions.ReadTimeout:
 			print ("Connection ERROR - timeout get user num")
 			get_time()
+		except OpenSSL.SSL.SysCallError:
+				print ("Connection ERROR - Broken Pipe 32")
+				get_time()
 		#except requests.exceptions.Timeout:
 		#	print ("Connection Timeout- user phone number")
 		else:
@@ -299,10 +306,14 @@ try:
 			print ("CONNECTION ERROR - no net carstat")
 			get_time()
 		except requests.exceptions.ReadTimeout:
-			print ("Connection ERROR - timeout get user num")
+			print ("Connection ERROR - timeout get carstat")
 			get_time()
+		except OpenSSL.SSL.SysCallError:
+				print ("Connection ERROR - Broken Pipe 32")
+				get_time()
 		else:
 			print ("Connected - get car stat")
+			print ("CARSTAT JSON:")
 			print (response.json())
 			if response.json()['Error'] == "True":
 				print ("BAD REQUEST")
@@ -321,6 +332,10 @@ try:
 					#print(ignition)
 					#print(car_id)
 				else:
+					ignition = "False"
+					taser = "False"
+					loc_stat = "False"
+					photo_stat = "False"
 					print ("CAR IS NOT TURNED ON")
 
 	def post_report_stat(): #Add if storage_id!= prev
@@ -346,6 +361,9 @@ try:
 				get_time()
 			except requests.exceptions.ReadTimeout:
 				print ("Connection ERROR - tpost report statchangecarstat")
+				get_time()
+			except OpenSSL.SSL.SysCallError:
+				print ("Connection ERROR - Broken Pipe 32")
 				get_time()
 			else:		
 				#print (response.json())
@@ -373,6 +391,10 @@ try:
 						except requests.exceptions.ReadTimeout:
 							print ("Connection ERROR - timeout post report stat")
 							get_time()
+						except OpenSSL.SSL.SysCallError:
+							print ("Connection ERROR - Broken Pipe 32")
+							get_time()
+
 						else:
 							sms_ignition =""
 							sms_gps = ""
@@ -416,7 +438,11 @@ try:
 		
 	def post_rep_info():
 		global mes
+		global images_taken
 		print("in post rep info")
+
+		if loc_stat != "True":
+			mes=""
 		
 		url = web_status + website + "/addreport/"
 		if loc_stat == "True" or photo_stat=="True":					
@@ -426,22 +452,36 @@ try:
 				'car_loc':mes, 	#place coordinates here
 				#'rep_photo':''	#place image here
 			}
-			file = {
-				'rep_photo':open(photo_loc, 'rb')	#place image here
-			}
+			if photo_stat == "True":
+				file = {
+					'rep_photo':open(photo_loc, 'rb')	#place image here
+				}
+			else:
+				file = {}
 			
 			try:
-				response = requests.post(url=url, data=req_info, files=file, timeout=time_out)
+				get_time()
+				response = requests.post(url=url, data=req_info, files=file, timeout=time_out+5)
 			except requests.exceptions.ConnectionError:
-				print ("Not connected timeout or no error - post repinfo")
+				get_time()
+				print ("Connection ERROR - no net post repinfo")
 			except requests.exceptions.ReadTimeout:
 				print ("Connection ERROR - timeout post rep info")
 				get_time()
+			except OpenSSL.SSL.SysCallError:
+				print ("Connection ERROR - Broken Pipe 32")
+				get_time()
+
 			else:
 				print ("Connected sent - postrepinfo")
 				mes=""
-				print (response.json())
-				images_taken = images_taken + 1 #find ++ equivalent in python
+				try:
+					print (response.json())
+				except ValueError:
+					print("cannotdecodeJSON - rep info sent")
+
+				if photo_stat == "True":
+					images_taken += 1 #find ++ equivalent in python
 		else:
 			print ("no command for photo or coord") #place coordiantes and photo here
 
