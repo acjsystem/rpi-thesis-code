@@ -47,22 +47,11 @@ try:
 	print ("datenow = %s" % (datenow))
 	while loc != "Location 3D Fix" : #Variable loc should output "Location 3D Fix" to skip this part, if not this will continue on loop until variable loc is equal to "Location 3D Fix"
 		ser.write("AT+CGPSSTATUS?"+"\r\n")
+		time.sleep(5)
 		res = ser.readlines()
 		print res
 		loc = res[1][posit+2:posit+18]
 		print loc
-		timenow = str(datetime.datetime.now().time())
-		times = "%s%s%s" % (timenow[0:2],timenow[3:5],timenow[6:8])
-		print (times)
-		currentstart = int(times)
-		if start<(currentstart-50):
-			ser.write("AT+CGPSSTATUS?"+"\r\n")
-			res = ser.readlines()
-			print res
-			loc = res[1][posit+2:posit+18]
-			print loc
-			print ("time limit")
-			break
 		
 
 	print("Setup OK")
@@ -137,8 +126,8 @@ try:
 	 				gps_func() #If the owner sends "gps" it will proceed to function "gps_func"
 		
 except KeyboardInterrupt:
-	GPIO.cleanup()
-
+	#GPIO.cleanup()
+	pass
 finally:
 	GPIO.cleanup()
 	
